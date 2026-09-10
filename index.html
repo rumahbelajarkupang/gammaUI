@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gamma UI — Program Andalan Rumah Belajar Kupang | Bimbel SIMAK UI</title>
+<meta name="description" content="Gamma UI lahir dari Rumah Belajar Kupang (2007). Program khusus SIMAK UI & Talenta untuk anak-anak NTT: kelas kecil, tryout akurat, 78% lolos jalur kedua." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230F1B2D'/%3E%3Cpath d='M12 30 L32 12 L52 30' stroke='%23F5A800' stroke-width='5' fill='none'/%3E%3Cpath d='M18 30 V52 H46 V30' stroke='%23F5A800' stroke-width='4' fill='none'/%3E%3Crect x='28' y='38' width='8' height='14' fill='%23F5A800'/%3E%3C/svg%3E" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<!-- Tailwind CDN + konfigurasi tema -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: { DEFAULT: '#F7F2E7', soft: '#EFE6D3', line: '#DCD3BD' },
+          ink:   { DEFAULT: '#0F1B2D', soft: '#1D2C48', mute: '#5C6879' },
+          gold:  { DEFAULT: '#F5A800', deep: '#D89300' },
+          rust:  '#C24A33',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'Georgia', 'serif'],
+          sans: ['"Instrument Sans"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  ::selection { background: #F5A800; color: #0F1B2D; }
+
+  /* ---- Latar kertas bergaris ala lembar ujian ---- */
+  .paper-lines {
+    background-image: repeating-linear-gradient(to bottom,
+      transparent 0, transparent 35px,
+      rgba(15,27,45,.06) 35px, rgba(15,27,45,.06) 36px);
+  }
+
+  /* ---- Marquee band ---- */
+  .marquee-track { display: flex; width: max-content; animation: mq 30s linear infinite; }
+  @keyframes mq { to { transform: translateX(-50%); } }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  /* ---- Stempel berputar ---- */
+  @keyframes spinSlow { to { transform: rotate(360deg); } }
+  .stamp-spin { animation: spinSlow 20s linear infinite; }
+
+  /* ---- Reveal on scroll ---- */
+  .reveal { opacity: 0; transform: translateY(26px);
+    transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1); }
+  .reveal.is-in { opacity: 1; transform: none; }
+
+  /* ---- Accordion (program & FAQ) ---- */
+  .acc-panel { overflow: hidden; max-height: 0;
+    transition: max-height .5s cubic-bezier(.2,.7,.2,1); }
+  .acc-icon { transition: transform .35s ease; }
+  .acc-item.open .acc-icon { transform: rotate(45deg); }
+  .acc-item.open .acc-row { background: rgba(15,27,45,.035); }
+  .prog-item.flash .acc-row { box-shadow: inset 4px 0 0 #F5A800; }
+
+  /* ---- Timeline rumah ---- */
+  .tl-line::before { content: ''; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 2px; background: rgba(247,242,231,.22); }
+  .tl-dot { position: absolute; left: 0; top: 6px; width: 16px; height: 16px; border: 2px solid #F5A800; background: #0F1B2D; }
+
+  /* ---- Slider kalkulator ---- */
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 30px; background: transparent; cursor: grab; }
+  input[type=range]:active { cursor: grabbing; }
+  input[type=range]::-webkit-slider-runnable-track { height: 2px; background: #0F1B2D; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin-top: -9px; background: #F5A800; border: 2px solid #0F1B2D; border-radius: 0; }
+  input[type=range]::-moz-range-track { height: 2px; background: #0F1B2D; }
+  input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: #F5A800; border: 2px solid #0F1B2D; border-radius: 0; }
+
+  /* ---- Carousel testimoni ---- */
+  .t-item { grid-area: 1 / 1; transition: opacity .45s ease, transform .45s ease; }
+  .t-item.off { opacity: 0; transform: translateY(14px); pointer-events: none; }
+
+  /* ---- Toast ---- */
+  #toast { transition: transform .4s cubic-bezier(.2,.7,.2,1), opacity .4s ease; }
+  #toast.hide { transform: translateY(140%); opacity: 0; pointer-events: none; }
+
+  /* ---- Titik pulsing ---- */
+  @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  .dot-live { animation: pulseDot 1.6s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .t-item, #toast, .acc-panel, .acc-icon { transition: none !important; }
+    .marquee-track, .stamp-spin, .dot-live { animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+
+<body class="bg-paper text-ink font-sans antialiased">
+
+<!-- ══════════════════════ TOPBAR ══════════════════════ -->
+<div class="bg-ink text-paper text-[11px] md:text-xs font-mono tracking-wider uppercase">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-2.5 flex items-center justify-between gap-4">
+    <p class="flex items-center gap-2 min-w-0">
+      <span class="dot-live inline-block w-1.5 h-1.5 bg-gold shrink-0"></span>
+      <span class="truncate">Gelombang II Gamma UI dibuka — kelas mulai 14 Juli · sisa 9 kursi</span>
+    </p>
+    <a href="#daftar" class="text-gold hover:text-paper underline underline-offset-4 shrink-0 transition-colors">Daftar →</a>
+  </div>
+</div>
+
+<!-- ══════════════════════ HEADER STICKY ══════════════════════ -->
+<header id="site-header" class="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-ink/10 transition-shadow">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between gap-6">
+    <a href="#atas" class="flex items-center gap-3 group min-w-0">
+      <!-- Logo rumah -->
+      <span class="w-9 h-9 bg-ink grid place-items-center shrink-0">
+        <svg viewBox="0 0 40 40" class="w-6 h-6">
+          <path d="M7 19 L20 8 L33 19" stroke="#F5A800" stroke-width="3" fill="none" />
+          <path d="M11 19 V31 H29 V19" stroke="#F5A800" stroke-width="2.5" fill="none" />
+          <rect x="17" y="23" width="6" height="8" fill="#F5A800" />
+        </svg>
+      </span>
+      <span class="leading-none min-w-0">
+        <span class="font-display font-black tracking-tight text-sm md:text-base block truncate">RUMAH BELAJAR KUPANG</span>
+        <span class="font-mono text-[9px] tracking-[0.22em] uppercase text-ink-mute flex items-center gap-1.5 mt-1">
+          <span class="text-gold-deep font-display italic text-xs">γ</span> Gamma UI · Simak &amp; Talenta
+        </span>
+      </span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-7" aria-label="Navigasi utama">
+      <a href="#rumah"       data-nav="rumah"       class="nav-link font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute hover:text-ink border-b-2 border-transparent py-1 transition-colors">Rumah</a>
+      <a href="#program"     data-nav="program"     class="nav-link font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute hover:text-ink border-b-2 border-transparent py-1 transition-colors">Program</a>
+      <a href="#metode"      data-nav="metode"      class="nav-link font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute hover:text-ink border-b-2 border-transparent py-1 transition-colors">Metode</a>
+      <a href="#kalkulator"  data-nav="kalkulator"  class="nav-link font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute hover:text-ink border-b-2 border-transparent py-1 transition-colors">Kalkulator</a>
+      <a href="#testimoni"   data-nav="testimoni"   class="nav-link font-mono text-[11px] tracking-[0.18em] uppercase text-ink-mute hover:text-ink border-b-2 border-transparent py-1 transition-colors">Testimoni</a>
+      <a href="#daftar" class="bg-gold text-ink font-semibold text-sm px-5 py-2.5 hover:bg-ink hover:text-gold transition-colors">Kelas trial gratis</a>
+    </nav>
+
+    <button id="menu-btn" class="md:hidden w-10 h-10 grid place-items-center border border-ink/25" aria-label="Buka menu" aria-expanded="false">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+  </div>
+  <!-- progres baca -->
+  <div id="scroll-progress" class="absolute bottom-0 left-0 h-[3px] bg-gold w-0"></div>
+</header>
+
+<!-- Menu mobile layar penuh -->
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-ink text-paper hidden" role="dialog" aria-modal="true">
+  <div class="h-16 flex items-center justify-between px-5">
+    <span class="font-display font-black text-base">RUMAH BELAJAR KUPANG</span>
+    <button id="menu-close" class="w-10 h-10 grid place-items-center border border-paper/30" aria-label="Tutup menu">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+  </div>
+  <nav class="px-5 pt-8 flex flex-col" aria-label="Navigasi mobile">
+    <a href="#rumah"      class="mob-link font-display text-4xl py-4 border-b border-paper/15 hover:text-gold transition-colors">Rumah</a>
+    <a href="#program"    class="mob-link font-display text-4xl py-4 border-b border-paper/15 hover:text-gold transition-colors">Program</a>
+    <a href="#metode"     class="mob-link font-display text-4xl py-4 border-b border-paper/15 hover:text-gold transition-colors">Metode</a>
+    <a href="#kalkulator" class="mob-link font-display text-4xl py-4 border-b border-paper/15 hover:text-gold transition-colors">Kalkulator</a>
+    <a href="#testimoni"  class="mob-link font-display text-4xl py-4 border-b border-paper/15 hover:text-gold transition-colors">Testimoni</a>
+    <a href="#daftar"     class="mob-link mt-8 bg-gold text-ink text-center font-semibold py-4 text-lg hover:bg-paper transition-colors">Kelas trial gratis</a>
+  </nav>
+  <p class="absolute bottom-8 left-5 font-mono text-[10px] tracking-[0.25em] uppercase text-paper/50">Kupang, NTT — sejak 2007</p>
+</div>
+
+<main id="atas">
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section class="relative paper-lines border-b-2 border-ink overflow-hidden">
+  <div class="hidden md:block absolute top-0 bottom-0 left-24 w-px bg-gold/40"></div>
+
+  <div class="max-w-6xl mx-auto px-5 md:px-8 pt-14 pb-16 md:pt-20 md:pb-24 relative">
+    <p class="reveal font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute mb-6 md:mb-8 flex items-center gap-3 flex-wrap">
+      <span class="w-8 h-px bg-gold inline-block"></span>
+      <span><span class="text-gold-deep font-display italic normal-case tracking-normal text-sm">γ</span> Gamma UI — program dari Rumah Belajar Kupang</span>
+    </p>
+
+    <div class="flex flex-col lg:flex-row lg:items-end gap-10 lg:gap-16">
+      <div class="flex-1 min-w-0">
+        <h1 class="reveal font-display font-black tracking-tight leading-[0.98] text-[clamp(2.5rem,7.2vw,5.4rem)]" style="transition-delay:.08s">
+          Dari rumah di Kupang,<br />
+          ke <em class="italic font-bold underline decoration-gold decoration-[0.09em] underline-offset-[0.14em]">kampus&nbsp;UI.</em>
+        </h1>
+
+        <p class="reveal mt-7 md:mt-9 max-w-xl text-base md:text-lg text-ink/80 leading-relaxed" style="transition-delay:.16s">
+          <strong class="font-semibold text-ink">Rumah Belajar Kupang</strong> mendampingi anak-anak NTT sejak 2007.
+          Dari rumah itu lahir <strong class="font-semibold text-ink">Gamma UI</strong> — program yang hanya mengerjakan
+          satu hal: menyiapkanmu lolos <strong class="font-semibold text-ink">SIMAK UI &amp; Talenta</strong>.
+        </p>
+
+        <div class="reveal mt-9 flex flex-wrap items-center gap-4" style="transition-delay:.24s">
+          <a href="#daftar" class="group inline-flex items-center gap-3 bg-ink text-paper px-7 py-4 font-semibold hover:bg-gold hover:text-ink transition-colors">
+            Coba kelas trial gratis
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+          </a>
+          <a href="#rumah" class="inline-flex items-center gap-3 border-2 border-ink px-7 py-[14px] font-semibold hover:bg-ink hover:text-paper transition-colors">
+            Kenalan dengan rumahnya
+          </a>
+        </div>
+
+        <p class="reveal mt-8 font-mono text-[11px] tracking-wider uppercase text-ink-mute flex flex-wrap gap-x-2 gap-y-1" style="transition-delay:.3s">
+          <span>5.200+ anak NTT di rumah</span><span class="text-gold">γ</span>
+          <span>3.412+ alumni Gamma</span><span class="text-gold">γ</span>
+          <span>78% lolos jalur kedua</span>
+        </p>
+      </div>
+
+      <!-- Stempel berputar -->
+      <div class="reveal hidden lg:block relative w-44 h-44 shrink-0 self-start" style="transition-delay:.35s" aria-hidden="true">
+        <svg viewBox="0 0 200 200" class="stamp-spin w-full h-full">
+          <defs>
+            <path id="circPath" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0" />
+          </defs>
+          <circle cx="100" cy="100" r="96" fill="none" stroke="#0F1B2D" stroke-width="2" />
+          <circle cx="100" cy="100" r="56" fill="none" stroke="#0F1B2D" stroke-width="1" />
+          <text fill="#0F1B2D" font-family="'JetBrains Mono',monospace" font-size="11.5" letter-spacing="2">
+            <textPath href="#circPath">RUMAH BELAJAR KUPANG • NTT • SEJAK 2007 •</textPath>
+          </text>
+        </svg>
+        <span class="absolute inset-0 grid place-items-center font-display italic font-black text-5xl text-gold">γ</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ MARQUEE ══════════════════════ -->
+<div class="marquee bg-ink text-paper py-4 overflow-hidden border-b-2 border-ink" aria-hidden="true">
+  <div class="marquee-track font-mono text-xs md:text-sm tracking-[0.2em] uppercase">
+    <div class="flex items-center gap-6 pr-6 shrink-0">
+      <span>Rumah Belajar Kupang</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Gamma UI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Simak UI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Ujian Talenta</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FKUI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FEB</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Fasilkom</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FMIPA</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FT</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FH</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FISIP</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Vokasi</span><span class="text-gold font-display italic text-base">γ</span>
+    </div>
+    <div class="flex items-center gap-6 pr-6 shrink-0">
+      <span>Rumah Belajar Kupang</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Gamma UI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Simak UI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Ujian Talenta</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FKUI</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FEB</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Fasilkom</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FMIPA</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FT</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FH</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>FISIP</span><span class="text-gold font-display italic text-base">γ</span>
+      <span>Vokasi</span><span class="text-gold font-display italic text-base">γ</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ 00 · RUMAH (ASAL-USUL RBK) ══════════════════════ -->
+<section id="rumah" class="scroll-mt-24 bg-ink text-paper border-b-2 border-ink relative overflow-hidden">
+  <!-- dekorasi garis rumah di sisi kanan -->
+  <svg class="hidden lg:block absolute -right-10 top-16 w-64 opacity-[0.15]" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+    <path d="M20 90 L100 20 L180 90" stroke="#F5A800" stroke-width="4" />
+    <path d="M40 90 V180 H160 V90" stroke="#F5A800" stroke-width="3" />
+    <rect x="86" y="120" width="28" height="60" stroke="#F5A800" stroke-width="3" />
+    <path d="M20 90 H0 M180 90 H200" stroke="#F5A800" stroke-width="3" />
+  </svg>
+
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24 relative">
+    <div class="grid lg:grid-cols-2 gap-14 lg:gap-20">
+      <!-- Kisah rumah -->
+      <div>
+        <p class="reveal font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-gold mb-5">γ / 00 — Rumah</p>
+        <h2 class="reveal font-display font-black tracking-tight text-4xl md:text-5xl leading-[1.05]">Sebelum ada Gamma,<br /><em class="italic font-bold text-gold">ada rumah.</em></h2>
+
+        <div class="reveal mt-8 space-y-5 text-paper/80 text-sm md:text-base leading-relaxed max-w-lg" style="transition-delay:.1s">
+          <p><span class="font-display float-left text-6xl leading-[0.8] pr-3 pt-1 text-gold font-black">R</span>umah Belajar Kupang dibuka tahun 2007 — awalnya hanya sebuah ruang baca. Anak-anak SMA datang selepas sekolah: meminjam buku, bertanya PR, saling mengajar di lantai kayu. Pelan-pelan, rumah ini menjadi tempat pulangan para pelajar Kupang.</p>
+          <p>Lalu satu hal terus kami perhatikan: anak-anak NTT jarang sampai UI. Bukan karena tidak mampu — tapi karena tidak ada yang menunjukkan jalannya. Apalagi jalur khusus <span class="text-paper font-semibold">SIMAK UI</span>, yang polanya berbeda dari ujian nasional manapun.</p>
+          <p>"Kalau kami mau UI, bagaimana caranya?" — pertanyaan itu muncul setiap tahun. Maka pada 2009, dari ruang depan rumah itu, kami merancang jawabannya: <span class="text-gold font-semibold">Gamma&nbsp;UI</span>.</p>
+        </div>
+
+        <blockquote class="reveal mt-9 border-l-4 border-gold pl-6" style="transition-delay:.18s">
+          <p class="font-display italic text-xl md:text-2xl leading-snug">"Kami tidak mendirikan bimbel.<br />Kami membuka rumah."</p>
+          <cite class="mt-3 block font-mono not-italic text-[10px] tracking-[0.25em] uppercase text-paper/50">— Para pendiri Rumah Belajar Kupang</cite>
+        </blockquote>
+
+        <p class="reveal mt-9 font-mono text-[10px] md:text-[11px] tracking-[0.18em] uppercase text-paper/50 leading-relaxed" style="transition-delay:.24s">
+          Di rumah ini tumbuh: <span class="text-gold font-display italic normal-case tracking-normal text-sm">γ</span> Gamma UI
+          <span class="text-paper/30 mx-1">·</span> Ruang baca &amp; bank soal
+          <span class="text-paper/30 mx-1">·</span> Kelas malam
+          <span class="text-paper/30 mx-1">·</span> Komunitas alumni
+        </p>
+      </div>
+
+      <!-- Linimasa -->
+      <div>
+        <p class="reveal font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-paper/60 mb-8">Sejarah singkat rumah</p>
+        <ol class="reveal tl-line relative space-y-10 md:space-y-12 pl-10" style="transition-delay:.12s">
+          <li class="relative">
+            <span class="tl-dot"></span>
+            <p class="font-mono text-gold text-sm font-bold">2007</p>
+            <h3 class="font-display font-bold text-xl md:text-2xl mt-1">Rumah dibuka</h3>
+            <p class="mt-2 text-paper/70 text-sm leading-relaxed max-w-sm">Sebuah ruang baca dan belajar di Kupang — terbuka siapa saja, sejak sore sampai malam.</p>
+          </li>
+          <li class="relative">
+            <span class="tl-dot"></span>
+            <p class="font-mono text-gold text-sm font-bold">2009</p>
+            <h3 class="font-display font-bold text-xl md:text-2xl mt-1"><span class="italic">γ</span> Gamma UI dilahirkan</h3>
+            <p class="mt-2 text-paper/70 text-sm leading-relaxed max-w-sm">Program khusus SIMAK UI — jawaban rumah bagi anak-anak NTT yang membidik Universitas Indonesia.</p>
+          </li>
+          <li class="relative">
+            <span class="tl-dot"></span>
+            <p class="font-mono text-gold text-sm font-bold">2016</p>
+            <h3 class="font-display font-bold text-xl md:text-2xl mt-1">Meluas ke seluruh NTT</h3>
+            <p class="mt-2 text-paper/70 text-sm leading-relaxed max-w-sm">Kelas daring dan tryout serentak: Ende, Atambua, Soe, Waingapu — rumah ini menjangkau mereka semua.</p>
+          </li>
+          <li class="relative">
+            <span class="tl-dot"></span>
+            <p class="font-mono text-gold text-sm font-bold">2025</p>
+            <h3 class="font-display font-bold text-xl md:text-2xl mt-1">Hari ini</h3>
+            <p class="mt-2 text-paper/70 text-sm leading-relaxed max-w-sm">18 tahun rumah berdiri; Gamma UI tetap satu-satunya program di NTT yang 100% fokus jalur UI.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Statistik RBK -->
+    <div class="reveal mt-16 md:mt-20 pt-10 border-t border-paper/20 grid grid-cols-1 md:grid-cols-[5fr_4fr_3fr] md:divide-x divide-paper/15">
+      <div class="border-b border-paper/15 md:border-b-0 pb-8 md:pr-10 md:pb-0">
+        <p class="font-display font-black text-[clamp(3.2rem,7vw,5.8rem)] leading-none tabular-nums"><span data-count="18">0</span><span class="text-gold">th</span></p>
+        <p class="mt-3 text-sm text-paper/70 max-w-[24ch] leading-relaxed">Rumah Belajar Kupang mendampingi pelajar NTT — tanpa berpindah arah.</p>
+      </div>
+      <div class="border-b border-paper/15 md:border-b-0 py-8 md:px-10 md:py-0">
+        <p class="font-display font-black text-[clamp(3.2rem,7vw,5.8rem)] leading-none tabular-nums"><span data-count="5200" data-format="id">0</span><span class="text-gold">+</span></p>
+        <p class="mt-3 text-sm text-paper/70 max-w-[24ch] leading-relaxed">anak-anak Kupang, Ende, Atambua, dan sekitarnya pernah belajar di rumah ini.</p>
+      </div>
+      <div class="pt-8 md:pl-10 md:pt-0">
+        <p class="font-display font-black text-[clamp(3.2rem,7vw,5.8rem)] leading-none tabular-nums"><span data-count="78">0</span><span class="text-gold">%</span></p>
+        <p class="mt-3 text-sm text-paper/70 max-w-[26ch] leading-relaxed">siswa Gamma UI 2024 lolos lewat SIMAK/Talenta <span class="text-paper/50">(kehadiran ≥ 85%)</span>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 01 · PROGRAM GAMMA UI ══════════════════════ -->
+<section id="program" class="scroll-mt-24 border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-6 mb-2">
+      <p class="font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute w-full">γ / 01 — Program Gamma UI</p>
+      <h2 class="font-display font-black tracking-tight text-4xl md:text-6xl leading-[1]">Pilih cara<br class="hidden md:block" /> masukmu.</h2>
+      <p class="max-w-sm text-sm text-ink/75 leading-relaxed md:text-right">Empat format kelas Gamma UI. Semua berpusat di rumah Kupang — sebagian bisa diikuti daring dari mana pun di NTT.</p>
+    </div>
+
+    <!-- 01 -->
+    <article class="prog-item acc-item border-b border-ink/25" data-prog="reguler">
+      <button class="acc-row w-full text-left px-2 md:px-4 py-7 md:py-9 flex items-center gap-5 md:gap-8 transition-colors" aria-expanded="false">
+        <span class="font-mono text-gold-deep font-bold text-sm md:text-base w-8 shrink-0">01</span>
+        <h3 class="flex-1 font-display font-bold tracking-tight text-2xl md:text-4xl leading-tight">Reguler SIMAK UI</h3>
+        <span class="hidden md:inline font-mono text-[10px] tracking-[0.18em] uppercase text-ink-mute shrink-0">Kupang + daring · 16×90mnt</span>
+        <span class="acc-icon w-10 h-10 md:w-12 md:h-12 shrink-0 grid place-items-center border-2 border-ink bg-paper group-hover:bg-gold">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </span>
+      </button>
+      <div class="acc-panel">
+        <div class="px-2 md:px-4 pb-10 pt-2 md:pl-[72px] grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-14">
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Untuk siapa</p>
+            <p class="text-sm leading-relaxed text-ink/85">Siswa kelas 12 dan alumni SNBT se-NTT yang mulai dari skor 30–55. Tanpa syarat nilai minimal — diagnostik awal yang menentukan, bukan rapor.</p>
+            <dl class="mt-6 font-mono text-xs space-y-2">
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Durasi</dt><dd>16 pertemuan × 90 mnt</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Jadwal</dt><dd>Sen–Kam, pagi / sore</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Kelas</dt><dd>maks. 12 kursi</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Biaya</dt><dd class="text-gold-deep font-bold">Rp 2.900.000 · cicil 3×</dd></div>
+            </dl>
+          </div>
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Yang kamu dapat</p>
+            <ul class="space-y-3 text-sm leading-relaxed text-ink/85">
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Seluruh subtes SIMAK: Penalaran Matematik, Verbal, Pengetahuan Kuantitatif, Pemahaman Umum, dan writing.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Modul disusun dari soal UI asli 2010–2025 — bukan modul SNBT yang dipaksakan.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Tryout bulanan berbasis CBT + laporan progres bulanan ke orang tua.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Akses ruang baca &amp; bank soal rumah Kupang selama program berjalan.</li>
+            </ul>
+            <a href="#daftar" class="prog-cta mt-7 inline-flex items-center gap-2 font-semibold border-b-2 border-gold pb-0.5 hover:text-gold-deep transition-colors" data-value="Reguler SIMAK UI">
+              Amankan kursi untuk Reguler <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 02 -->
+    <article class="prog-item acc-item border-b border-ink/25" data-prog="sprint">
+      <button class="acc-row w-full text-left px-2 md:px-4 py-7 md:py-9 flex items-center gap-5 md:gap-8 transition-colors" aria-expanded="false">
+        <span class="font-mono text-gold-deep font-bold text-sm md:text-base w-8 shrink-0">02</span>
+        <h3 class="flex-1 font-display font-bold tracking-tight text-2xl md:text-4xl leading-tight">Intensif <em class="italic">Final Sprint</em></h3>
+        <span class="hidden md:inline font-mono text-[10px] tracking-[0.18em] uppercase text-ink-mute shrink-0">3 pekan · Senin–Sabtu</span>
+        <span class="acc-icon w-10 h-10 md:w-12 md:h-12 shrink-0 grid place-items-center border-2 border-ink bg-paper group-hover:bg-gold">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </span>
+      </button>
+      <div class="acc-panel">
+        <div class="px-2 md:px-4 pb-10 pt-2 md:pl-[72px] grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-14">
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Untuk siapa</p>
+            <p class="text-sm leading-relaxed text-ink/85">Skor diagnostik sudah 60 ke atas dan targetnya program kompetitif — FKUI, FEB, Fasilkom. Tiga pekan terakhir sebelum hari-H, penuh drill.</p>
+            <dl class="mt-6 font-mono text-xs space-y-2">
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Durasi</dt><dd>3 pekan · 4 jam/hari</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Jadwal</dt><dd>Senin–Sabtu, intensive</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Kelas</dt><dd>maks. 10 kursi</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Biaya</dt><dd class="text-gold-deep font-bold">Rp 4.500.000 · cicil 2×</dd></div>
+            </dl>
+          </div>
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Yang kamu dapat</p>
+            <ul class="space-y-3 text-sm leading-relaxed text-ink/85">
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Drill harian per subtes dengan target skor mingguan yang dipantau mentor.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>3 tryout penuh ber simulasi CBT + pembahasan langsung di hari yang sama.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Kelas strategi manajemen waktu per tipe soal khas UI.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Sesi 1-on-1 pemilihan program UI yang realistis dengan datamu.</li>
+            </ul>
+            <a href="#daftar" class="prog-cta mt-7 inline-flex items-center gap-2 font-semibold border-b-2 border-gold pb-0.5 hover:text-gold-deep transition-colors" data-value="Intensif Final Sprint">
+              Amankan kursi untuk Final Sprint <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 03 -->
+    <article class="prog-item acc-item border-b border-ink/25" data-prog="privat">
+      <button class="acc-row w-full text-left px-2 md:px-4 py-7 md:py-9 flex items-center gap-5 md:gap-8 transition-colors" aria-expanded="false">
+        <span class="font-mono text-gold-deep font-bold text-sm md:text-base w-8 shrink-0">03</span>
+        <h3 class="flex-1 font-display font-bold tracking-tight text-2xl md:text-4xl leading-tight">Privat 1-on-1</h3>
+        <span class="hidden md:inline font-mono text-[10px] tracking-[0.18em] uppercase text-ink-mute shrink-0">Fleksibel · online/offline</span>
+        <span class="acc-icon w-10 h-10 md:w-12 md:h-12 shrink-0 grid place-items-center border-2 border-ink bg-paper group-hover:bg-gold">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </span>
+      </button>
+      <div class="acc-panel">
+        <div class="px-2 md:px-4 pb-10 pt-2 md:pl-[72px] grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-14">
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Untuk siapa</p>
+            <p class="text-sm leading-relaxed text-ink/85">Jadwal tidak menentu, berada jauh dari Kupang, atau butuh fokus total pada 1–2 subtes yang tertinggal jauh.</p>
+            <dl class="mt-6 font-mono text-xs space-y-2">
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Paket</dt><dd>mulai 4 sesi × 90 mnt</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Jadwal</dt><dd>menyesuaikan siswa</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Mode</dt><dd>daring / rumah Kupang</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Biaya</dt><dd class="text-gold-deep font-bold">Rp 850.000 / 4 sesi</dd></div>
+            </dl>
+          </div>
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Yang kamu dapat</p>
+            <ul class="space-y-3 text-sm leading-relaxed text-ink/85">
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Kurikulum disusun ulang per siswa, berdasarkan hasil diagnostik.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Mentor alumni UI dari fakultas tujuan (dapat diminta spesifik).</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Laporan progres per sesi — terlihat jelas apa yang berubah.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Paling cocok untuk siswa di Ende, Atambua, Soe, dan Waingapu.</li>
+            </ul>
+            <a href="#daftar" class="prog-cta mt-7 inline-flex items-center gap-2 font-semibold border-b-2 border-gold pb-0.5 hover:text-gold-deep transition-colors" data-value="Privat 1-on-1">
+              Jadwalkan privat <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 04 -->
+    <article class="prog-item acc-item border-b-2 border-ink" data-prog="tryout">
+      <button class="acc-row w-full text-left px-2 md:px-4 py-7 md:py-9 flex items-center gap-5 md:gap-8 transition-colors" aria-expanded="false">
+        <span class="font-mono text-gold-deep font-bold text-sm md:text-base w-8 shrink-0">04</span>
+        <h3 class="flex-1 font-display font-bold tracking-tight text-2xl md:text-4xl leading-tight">Tryout<sup class="font-mono text-sm text-gold-deep align-super">+</sup> &amp; Diagnostik</h3>
+        <span class="hidden md:inline font-mono text-[10px] tracking-[0.18em] uppercase text-ink-mute shrink-0">Terbuka umum · CBT serentak NTT</span>
+        <span class="acc-icon w-10 h-10 md:w-12 md:h-12 shrink-0 grid place-items-center border-2 border-ink bg-paper group-hover:bg-gold">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+        </span>
+      </button>
+      <div class="acc-panel">
+        <div class="px-2 md:px-4 pb-10 pt-2 md:pl-[72px] grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-14">
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Untuk siapa</p>
+            <p class="text-sm leading-relaxed text-ink/85">Siapa pun di NTT — termasuk siswa bimbel lain — yang ingin tahu posisi aslinya dengan kisi-kisi dan tingkat kesulitan setara SIMAK UI.</p>
+            <dl class="mt-6 font-mono text-xs space-y-2">
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Paket</dt><dd>6 tryout + 1 diagnostik</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Sistem</dt><dd>CBT serentak seluruh NTT</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Laporan</dt><dd>per subtes + percentile</dd></div>
+              <div class="flex justify-between border-t border-ink/15 pt-2"><dt class="text-ink-mute uppercase tracking-wider">Biaya</dt><dd class="text-gold-deep font-bold">Rp 350.000</dd></div>
+            </dl>
+          </div>
+          <div>
+            <p class="font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute mb-4">Yang kamu dapat</p>
+            <ul class="space-y-3 text-sm leading-relaxed text-ink/85">
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>6 paket TO dengan pembahasan tertulis lengkap tiap soal.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Diagnostik awal 90 menit + peta kelemahan per tipe soal.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Perbandingan percentile dengan peserta NTT lain di cohort yang sama.</li>
+              <li class="flex gap-3"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-gold-deep shrink-0"></i>Rekomendasi tertulis program UI yang paling masuk akal.</li>
+            </ul>
+            <a href="#daftar" class="prog-cta mt-7 inline-flex items-center gap-2 font-semibold border-b-2 border-gold pb-0.5 hover:text-gold-deep transition-colors" data-value="Tryout+ & Diagnostik">
+              Ikut tryout berikutnya <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════════════ 02 · METODE ══════════════════════ -->
+<section id="metode" class="scroll-mt-24 bg-ink text-paper border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24 grid lg:grid-cols-[2fr_3fr] gap-12 lg:gap-20">
+    <div class="lg:sticky lg:top-28 self-start">
+      <p class="reveal font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-gold mb-5">γ / 02 — Metode</p>
+      <h2 class="reveal font-display font-black tracking-tight text-4xl md:text-5xl leading-[1.05]">Empat fase,<br /><em class="italic font-bold text-gold">satu jalur:</em><br />Salemba.</h2>
+      <p class="reveal mt-6 text-paper/75 text-sm md:text-base leading-relaxed max-w-sm">Metode yang diasah 15 tahun di rumah Kupang — bukan "kelas remedial SNBT". Seluruh sistem dibangun untuk pola soal dan psikologi ujian UI.</p>
+      <p class="reveal mt-8 font-mono text-[10px] tracking-[0.2em] uppercase text-paper/50">Di audit tiap semester<br />berdasarkan hasil TO &amp; umpan balik siswa.</p>
+    </div>
+
+    <ol class="space-y-0">
+      <li class="reveal border-t border-paper/20 py-8 md:py-10 grid grid-cols-[auto,1fr] gap-5 md:gap-8">
+        <span class="font-mono text-gold text-sm md:text-base pt-1.5">F.01</span>
+        <div>
+          <h3 class="font-display font-bold text-2xl md:text-3xl mb-2">Diagnostik</h3>
+          <p class="text-paper/75 text-sm md:text-base leading-relaxed max-w-xl">Tes masuk 90 menit. Kami memetakan skormu <em class="italic text-paper">per subtes</em>, bukan sekadar total — lalu menuliskan jalur belajar spesifik untukmu di atas kertas.</p>
+        </div>
+      </li>
+      <li class="reveal border-t border-paper/20 py-8 md:py-10 grid grid-cols-[auto,1fr] gap-5 md:gap-8" style="transition-delay:.08s">
+        <span class="font-mono text-gold text-sm md:text-base pt-1.5">F.02</span>
+        <div>
+          <h3 class="font-display font-bold text-2xl md:text-3xl mb-2">Bangun fondasi</h3>
+          <p class="text-paper/75 text-sm md:text-base leading-relaxed max-w-xl">Kelas maksimal 12 kursi, mentor alumni UI. Materi disusun dari soal SIMAK &amp; Talenta asli 15 tahun terakhir — dikelompokkan per tipe dan tingkat kesulitan.</p>
+        </div>
+      </li>
+      <li class="reveal border-t border-paper/20 py-8 md:py-10 grid grid-cols-[auto,1fr] gap-5 md:gap-8" style="transition-delay:.16s">
+        <span class="font-mono text-gold text-sm md:text-base pt-1.5">F.03</span>
+        <div>
+          <h3 class="font-display font-bold text-2xl md:text-3xl mb-2">Uji &amp; ukur</h3>
+          <p class="text-paper/75 text-sm md:text-base leading-relaxed max-w-xl">Tryout dua mingguan berbasis CBT, serentak di seluruh NTT. Laporan progres dikirim ke orang tua — kalau skormu turun, kami bilang apa adanya.</p>
+        </div>
+      </li>
+      <li class="reveal border-y border-paper/20 py-8 md:py-10 grid grid-cols-[auto,1fr] gap-5 md:gap-8" style="transition-delay:.24s">
+        <span class="font-mono text-gold text-sm md:text-base pt-1.5">F.04</span>
+        <div>
+          <h3 class="font-display font-bold text-2xl md:text-3xl mb-2">Strategi akhir</h3>
+          <p class="text-paper/75 text-sm md:text-base leading-relaxed max-w-xl">Pemilihan program UI yang realistis dengan datamu, trik manajemen waktu per subtes, dan pendampingan sampai detik kamu menekan "submit" formulir hari-H.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════════════════ 03 · KALKULATOR ══════════════════════ -->
+<section id="kalkulator" class="scroll-mt-24 border-b-2 border-ink paper-lines">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-6 mb-10 md:mb-14">
+      <p class="font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute w-full">γ / 03 — Kalkulator</p>
+      <h2 class="font-display font-black tracking-tight text-4xl md:text-6xl leading-[1]">Ukur posisimu<br class="hidden md:block" /> dulu, gratis.</h2>
+      <p class="max-w-sm text-sm text-ink/75 leading-relaxed md:text-right">Geser estimasi skormu per subtes SIMAK — hasilnya langsung merekomendasikan program Gamma yang paling masuk akal.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16">
+      <div class="space-y-8">
+        <div class="reveal">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="s-pm" class="font-display font-bold text-lg md:text-xl">Penalaran Matematik</label>
+            <output id="o-pm" class="font-mono font-bold text-lg tabular-nums">42</output>
+          </div>
+          <input type="range" id="s-pm" min="0" max="100" value="42" aria-label="Estimasi skor Penalaran Matematik" />
+          <p class="font-mono text-[10px] uppercase tracking-wider text-ink-mute">Logika, deret, dan soal cerita khas UI</p>
+        </div>
+        <div class="reveal" style="transition-delay:.06s">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="s-pv" class="font-display font-bold text-lg md:text-xl">Penalaran Verbal</label>
+            <output id="o-pv" class="font-mono font-bold text-lg tabular-nums">55</output>
+          </div>
+          <input type="range" id="s-pv" min="0" max="100" value="55" aria-label="Estimasi skor Penalaran Verbal" />
+          <p class="font-mono text-[10px] uppercase tracking-wider text-ink-mute">Analogi, silogisme, analitis</p>
+        </div>
+        <div class="reveal" style="transition-delay:.12s">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="s-pk" class="font-display font-bold text-lg md:text-xl">Pengetahuan Kuantitatif</label>
+            <output id="o-pk" class="font-mono font-bold text-lg tabular-nums">48</output>
+          </div>
+          <input type="range" id="s-pk" min="0" max="100" value="48" aria-label="Estimasi skor Pengetahuan Kuantitatif" />
+          <p class="font-mono text-[10px] uppercase tracking-wider text-ink-mute">Matematika dasar–menengah terapan</p>
+        </div>
+        <div class="reveal" style="transition-delay:.18s">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="s-ppu" class="font-display font-bold text-lg md:text-xl">Pemahaman Umum</label>
+            <output id="o-ppu" class="font-mono font-bold text-lg tabular-nums">60</output>
+          </div>
+          <input type="range" id="s-ppu" min="0" max="100" value="60" aria-label="Estimasi skor Pengetahuan dan Pemahaman Umum" />
+          <p class="font-mono text-[10px] uppercase tracking-wider text-ink-mute">Sains, sosial, budaya, reading</p>
+        </div>
+        <p class="reveal font-mono text-[10px] tracking-wider uppercase text-ink-mute pt-2 border-t border-ink/15" style="transition-delay:.24s">
+          * Alat orientasi kasar — bukan prediksi resmi kelulusan.
+        </p>
+      </div>
+
+      <div class="reveal lg:sticky lg:top-28 self-start border-2 border-ink bg-paper-soft" style="transition-delay:.1s">
+        <div class="border-b-2 border-ink px-6 py-4 flex items-center justify-between">
+          <span class="font-mono text-[10px] tracking-[0.3em] uppercase font-bold">Estimasi γ</span>
+          <span class="font-display italic text-xl text-gold-deep">γ</span>
+        </div>
+        <div class="px-6 py-7">
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-mute mb-1">Skor gabungan</p>
+          <p class="font-display font-black text-6xl md:text-7xl tabular-nums leading-none"><span id="calc-avg">51</span><span class="text-2xl text-ink-mute">/100</span></p>
+
+          <div class="relative mt-7">
+            <div class="h-4 border-2 border-ink bg-paper">
+              <div id="calc-fill" class="h-full bg-gold transition-[width] duration-200 ease-out" style="width:51%"></div>
+            </div>
+            <div class="absolute -top-1.5 -bottom-1.5 w-[2px] bg-rust" style="left:72%" title="Rata-rata peserta lolos 2024: 72"></div>
+            <div class="flex justify-between mt-2 font-mono text-[9px] tracking-wider uppercase text-ink-mute">
+              <span>0</span>
+              <span class="text-rust font-bold">ambang lolos ±72</span>
+              <span>100</span>
+            </div>
+          </div>
+
+          <p id="calc-verdict" class="mt-7 font-display italic text-xl md:text-2xl leading-snug min-h-[3.5rem]">
+            Kamu di tengah jalur. Yang kurang biasanya konsistensi, bukan kemampuan.
+          </p>
+
+          <button id="calc-cta" class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-ink text-paper font-semibold py-4 hover:bg-gold hover:text-ink transition-colors" data-target="reguler">
+            Lihat rekomendasi: Reguler SIMAK UI <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 04 · TESTIMONI ══════════════════════ -->
+<section id="testimoni" class="scroll-mt-24 border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-6 mb-10 md:mb-14">
+      <p class="font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute w-full">γ / 04 — Testimoni</p>
+      <h2 class="font-display font-black tracking-tight text-4xl md:text-6xl leading-[1]">Kata mereka,<br class="hidden md:block" /> bukan kata kami.</h2>
+      <div class="flex items-center gap-3 md:pb-2">
+        <button id="t-prev" class="w-12 h-12 border-2 border-ink grid place-items-center hover:bg-ink hover:text-gold transition-colors" aria-label="Testimoni sebelumnya">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <button id="t-next" class="w-12 h-12 border-2 border-ink grid place-items-center hover:bg-ink hover:text-gold transition-colors" aria-label="Testimoni berikutnya">
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="t-stage" class="reveal grid min-h-[16rem] md:min-h-[14rem]">
+      <figure class="t-item">
+        <blockquote class="font-display italic font-medium text-2xl md:text-4xl leading-snug max-w-4xl">
+          "SNBT gagal, saya pikir tamat. Dua setengah bulan di Gamma, dari rumah di Kupang, membaliknya — Pengetahuan Kuantitatif dari 38 ke 76. Sekarang saya ngekos lima menit dari kampus."
+        </blockquote>
+        <figcaption class="mt-6 font-mono text-xs tracking-wider uppercase text-ink-mute">Raka D. — Fasilkom '24 · alumnus SMAN 1 Kupang</figcaption>
+      </figure>
+      <figure class="t-item off">
+        <blockquote class="font-display italic font-medium text-2xl md:text-4xl leading-snug max-w-4xl">
+          "Dari Soe, saya ikut semuanya daring — kelas, tryout, sampai konsultasi pemilihan program. Orang tua saya di Soe bisa memantau laporan tiap bulan. FEB sekarang rumah kedua saya."
+        </blockquote>
+        <figcaption class="mt-6 font-mono text-xs tracking-wider uppercase text-ink-mute">Saras P. — Manajemen (FEB) '23 · dari Soe</figcaption>
+      </figure>
+      <figure class="t-item off">
+        <blockquote class="font-display italic font-medium text-2xl md:text-4xl leading-snug max-w-4xl">
+          "Kelasnya cuma 12 orang dan kakak pengajar hafal titik lemah tiap siswa. Malam sebelum ujian dikirim rangkuman strategi pengerjaan — kecil, tapi justru itu yang bikin tenang."
+        </blockquote>
+        <figcaption class="mt-6 font-mono text-xs tracking-wider uppercase text-ink-mute">Nadia R. — Kedokteran (FKUI) '24 · dari Ende</figcaption>
+      </figure>
+      <figure class="t-item off">
+        <blockquote class="font-display italic font-medium text-2xl md:text-4xl leading-snug max-w-4xl">
+          "Yang saya bayar sebenarnya bukan kelas, tapi sistem: jadwal, materi, TO, evaluasi — tinggal ikuti. Anak malas seperti saya, dari Atambua pula, butuh persis itu."
+        </figcaption>
+        <figcaption class="mt-6 font-mono text-xs tracking-wider uppercase text-ink-mute">Bimo A. — Teknik Sipil (FT) '23 · dari Atambua</figcaption>
+      </figure>
+    </div>
+
+    <p id="t-counter" class="reveal mt-8 font-mono text-xs tracking-[0.3em] uppercase text-ink-mute">01 / 04</p>
+  </div>
+</section>
+
+<!-- ══════════════════════ 05 · JADWAL ══════════════════════ -->
+<section id="jadwal" class="scroll-mt-24 border-b-2 border-ink bg-paper-soft">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-6">
+      <p class="font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute w-full">γ / 05 — Jadwal</p>
+      <h2 class="font-display font-black tracking-tight text-4xl md:text-6xl leading-[1]">Gelombang<br class="hidden md:block" /> tahun ini.</h2>
+      <p class="max-w-sm text-sm text-ink/75 leading-relaxed md:text-right">Kelas kecil berarti kursi benar-benar terbatas — jangan menunggu gelombang terakhir.</p>
+    </div>
+
+    <div class="reveal font-mono">
+      <div class="hidden md:grid grid-cols-[1fr,1.2fr,1.6fr,1fr] gap-4 py-4 text-[10px] tracking-[0.25em] uppercase text-ink-mute border-b border-ink/25">
+        <span>Gel.</span><span>Periode</span><span>Kelas yang dibuka</span><span class="text-right">Status</span>
+      </div>
+
+      <div class="grid md:grid-cols-[1fr,1.2fr,1.6fr,1fr] gap-1 md:gap-4 py-6 md:py-7 border-b border-ink/25 items-center">
+        <span class="font-bold text-sm md:text-base">I</span>
+        <span class="text-sm text-ink/80">5 Mei — 28 Jun</span>
+        <span class="text-sm text-ink/80">Reguler Batch A</span>
+        <span class="md:text-right font-bold text-[11px] md:text-xs tracking-[0.15em] uppercase text-rust">Penuh</span>
+      </div>
+
+      <div class="grid md:grid-cols-[1fr,1.2fr,1.6fr,1fr] gap-1 md:gap-4 py-6 md:py-7 border-b border-ink/25 items-center bg-gold/15 md:bg-transparent md:hover:bg-gold/15 transition-colors px-2 md:px-0 -mx-2 md:mx-0">
+        <span class="font-bold text-sm md:text-base">II</span>
+        <span class="text-sm text-ink/80">14 Jul — 30 Agu</span>
+        <span class="text-sm text-ink/80 font-semibold">Reguler Batch B &amp; Intensif</span>
+        <span class="md:text-right font-bold text-[11px] md:text-xs tracking-[0.15em] uppercase text-gold-deep flex md:justify-end items-center gap-2">
+          <span class="dot-live inline-block w-1.5 h-1.5 bg-gold-deep"></span> Dibuka · sisa 9 kursi
+        </span>
+      </div>
+
+      <div class="grid md:grid-cols-[1fr,1.2fr,1.6fr,1fr] gap-1 md:gap-4 py-6 md:py-7 border-b border-ink/25 items-center">
+        <span class="font-bold text-sm md:text-base">III</span>
+        <span class="text-sm text-ink/80">8 Sep — 26 Sep</span>
+        <span class="text-sm text-ink/80">Final Sprint &amp; Tryout+</span>
+        <span class="md:text-right font-bold text-[11px] md:text-xs tracking-[0.15em] uppercase text-ink-mute">Segera</span>
+      </div>
+    </div>
+
+    <a href="#daftar" class="reveal mt-8 inline-flex items-center gap-2 font-semibold border-b-2 border-gold pb-0.5 hover:text-gold-deep transition-colors">
+      Tanya dulu via WhatsApp sebelum kursi habis <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════ 06 · FAQ ══════════════════════ -->
+<section id="faq" class="scroll-mt-24 border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24">
+    <div class="reveal flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-6 mb-2">
+      <p class="font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase text-ink-mute w-full">γ / 06 — FAQ</p>
+      <h2 class="font-display font-black tracking-tight text-4xl md:text-6xl leading-[1]">Yang paling<br class="hidden md:block" /> sering ditanya.</h2>
+    </div>
+
+    <div id="faq-list">
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Apa itu Rumah Belajar Kupang? Apa hubungannya dengan Gamma UI?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            Rumah Belajar Kupang (RBK) adalah rumah belajar di Kupang, NTT, yang berdiri sejak 2007 — ruang baca, kelas, dan komunitas bagi pelajar se-NTT. Gamma UI adalah salah satu program yang lahir dari rumah ini (2009), khusus mempersiapkan masuk Universitas Indonesia. Semua layanan Gamma berpusat di rumah Kupang dan daring.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Apa bedanya SIMAK UI dengan SNBT?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            SNBT adalah jalur nasional bersama seluruh PTN. SIMAK UI adalah ujian mandiri Universitas Indonesia — plus Ujian Talenta untuk sebagian program. Materinya ada yang overlap, tetapi pola soal, bobot subtes, dan strategi pengerjaannya khas UI. Kurikulum Gamma dibangun 100% untuk pola itu.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Saya di luar Kupang (Ende, Atambua, Soe…) — tetap bisa?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            Sangat bisa — justru itu alasan rumah ini meluas sejak 2016. Kelas utama berjalan di Kupang dan direkam (bisa diikuti daring), privat tersedia penuh daring, dan seluruh tryout diselenggarakan serentak berbasis CBT dari kota mana pun di NTT.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Skor saya masih rendah banget — masih sempat?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            Sebagian besar siswa kami justru mulai dari skor 30–55 — itu alasan program Reguler ada. Yang penting bukan angka awal, tapi jarak waktu ke ujian dan kesediaan mengikuti sistem. Coba kalkulator di atas untuk gambaran kasar, lalu diagnostik resmi akan memastikannya.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Apakah dijamin lolos?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            Tidak, dan siapa pun yang menjanjikan itu sedang berjualan. Yang bisa kami janjikan adalah sistem: frekuensi latihan, kualitas materi, dan evaluasi yang jujur — warisan disiplin rumah sejak 2007. Dengan kehadiran minimal 85%, 78% siswa Gamma 2024 kami lolos di jalur kedua.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item border-b border-ink/25">
+        <button class="acc-row w-full text-left px-2 md:px-4 py-6 flex items-center gap-5 transition-colors" aria-expanded="false">
+          <h3 class="flex-1 font-semibold text-base md:text-lg">Bisa dicicil?</h3>
+          <span class="acc-icon w-9 h-9 shrink-0 grid place-items-center border border-ink bg-paper"><i data-lucide="plus" class="w-4 h-4"></i></span>
+        </button>
+        <div class="acc-panel">
+          <div class="px-2 md:px-4 pb-7 md:pl-16 text-sm leading-relaxed text-ink/80 max-w-2xl">
+            Bisa — 2× hingga 3× angsuran tanpa bunga, tergantung program. Cukup sampaikan saat konsultasi pendaftaran di rumah, tim keuangan kami yang mengatur skemanya.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ 07 · DAFTAR (FORM) ══════════════════════ -->
+<section id="daftar" class="scroll-mt-24 bg-gold text-ink border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-16 md:py-24 grid lg:grid-cols-2 gap-12 lg:gap-20">
+    <div>
+      <p class="reveal font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase mb-5">γ / 07 — Pendaftaran</p>
+      <h2 class="reveal font-display font-black tracking-tight text-4xl md:text-6xl leading-[0.98]">Amankan<br /><em class="italic font-bold">satu kursi.</em></h2>
+      <p class="reveal mt-6 max-w-md text-ink/85 leading-relaxed">Kelas trial gratis berlangsung 90 menit — di rumah kami di Kupang atau daring. Kamu akan langsung mencoba satu subtes SIMAK bersama mentor, tanpa komitmen apa pun.</p>
+      <ul class="reveal mt-8 space-y-3 font-mono text-xs uppercase tracking-wider">
+        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4"></i> Dibalas &lt; 1×24 jam via WhatsApp</li>
+        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4"></i> Tanpa biaya, tanpa syarat</li>
+        <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4"></i> Slot Rabu &amp; Sabtu tiap pekan</li>
+      </ul>
+    </div>
+
+    <div class="reveal border-2 border-ink bg-paper">
+      <div class="border-b-2 border-ink px-6 md:px-8 py-4 flex items-center justify-between">
+        <span class="font-mono text-[10px] tracking-[0.3em] uppercase font-bold">Formulir trial · RBK</span>
+        <span class="font-display italic text-xl text-gold-deep">γ</span>
+      </div>
+
+      <form id="trial-form" class="px-6 md:px-8 py-7 space-y-6" novalidate>
+        <div>
+          <label for="f-nama" class="block font-mono text-[10px] tracking-[0.2em] uppercase text-ink-mute mb-2">Nama lengkap</label>
+          <input id="f-nama" type="text" autocomplete="name" placeholder="cth. Adisya Ramadhani"
+            class="w-full bg-transparent border-2 border-ink/60 focus:border-ink outline-none px-4 py-3 text-base placeholder:text-ink/30 transition-colors" />
+          <p class="err font-mono text-[11px] text-rust mt-1.5 hidden">Nama minimal 2 huruf.</p>
+        </div>
+
+        <div>
+          <label for="f-wa" class="block font-mono text-[10px] tracking-[0.2em] uppercase text-ink-mute mb-2">Nomor WhatsApp</label>
+          <input id="f-wa" type="tel" inputmode="numeric" autocomplete="tel" placeholder="cth. 0812 3456 7890"
+            class="w-full bg-transparent border-2 border-ink/60 focus:border-ink outline-none px-4 py-3 text-base placeholder:text-ink/30 transition-colors" />
+          <p class="err font-mono text-[11px] text-rust mt-1.5 hidden">Masukkan nomor WA yang valid (9–14 digit).</p>
+        </div>
+
+        <div>
+          <label for="f-prog" class="block font-mono text-[10px] tracking-[0.2em] uppercase text-ink-mute mb-2">Program yang diminati</label>
+          <select id="f-prog" class="w-full bg-transparent border-2 border-ink/60 focus:border-ink outline-none px-4 py-3 text-base appearance-none cursor-pointer transition-colors">
+            <option value="" selected disabled>— pilih program —</option>
+            <option>Reguler SIMAK UI</option>
+            <option>Intensif Final Sprint</option>
+            <option>Privat 1-on-1</option>
+            <option>Tryout+ & Diagnostik</option>
+            <option>Belum tahu — konsultasi dulu</option>
+          </select>
+          <p class="err font-mono text-[11px] text-rust mt-1.5 hidden">Pilih salah satu program.</p>
+        </div>
+
+        <label class="flex items-start gap-3 cursor-pointer select-none">
+          <input id="f-konsul" type="checkbox" class="mt-1 w-4 h-4 accent-[#0F1B2D]" />
+          <span class="text-sm text-ink/80 leading-snug">Saya ingin konsultasi dulu sebelum memilih (bisa bersama orang tua).</span>
+        </label>
+
+        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-ink text-paper font-semibold py-4 hover:bg-gold hover:text-ink transition-colors">
+          Kirim &amp; jadwalkan trial <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+        <p class="font-mono text-[10px] tracking-wider uppercase text-ink-mute text-center">Datamu hanya dipakai untuk menghubungi kamu.</p>
+      </form>
+
+      <div id="form-success" class="hidden px-6 md:px-8 py-10 text-center">
+        <span class="mx-auto w-14 h-14 bg-ink text-gold grid place-items-center mb-5"><i data-lucide="check" class="w-7 h-7"></i></span>
+        <h3 class="font-display font-black text-2xl md:text-3xl">Terima kasih, <span id="s-nama" class="italic text-gold-deep">Kak</span>!</h3>
+        <p class="mt-3 text-sm text-ink/80 leading-relaxed max-w-xs mx-auto">Slot trial untuk <span id="s-prog" class="font-semibold text-ink">program pilihanmu</span> sudah dicatat. Tim Rumah Belajar Kupang akan menghubungi via WhatsApp dalam 1×24 jam.</p>
+        <p class="mt-6 font-mono text-[10px] tracking-[0.25em] uppercase text-ink-mute">Kode ref: <span id="s-ref" class="text-gold-deep font-bold">γ-0000</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer class="bg-ink text-paper">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20 grid md:grid-cols-[2fr,1fr,1.2fr] gap-10 md:gap-16">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 bg-gold grid place-items-center">
+          <svg viewBox="0 0 40 40" class="w-6 h-6">
+            <path d="M7 19 L20 8 L33 19" stroke="#0F1B2D" stroke-width="3" fill="none" />
+            <path d="M11 19 V31 H29 V19" stroke="#0F1B2D" stroke-width="2.5" fill="none" />
+            <rect x="17" y="23" width="6" height="8" fill="#0F1B2D" />
+          </svg>
+        </span>
+        <span class="font-display font-black text-xl">RUMAH BELAJAR KUPANG</span>
+      </div>
+      <p class="mt-5 text-paper/70 text-sm leading-relaxed max-w-xs">Rumah belajar bagi pelajar NTT sejak 2007 — ruang baca, kelas, dan komunitas. Dari rumah ini lahir <span class="text-gold font-display italic">γ</span> Gamma UI, program khusus masuk Universitas Indonesia.</p>
+      <div class="mt-6 flex gap-6 font-mono text-[11px] tracking-[0.15em] uppercase">
+        <a href="#" class="text-paper/70 hover:text-gold underline underline-offset-4 decoration-transparent hover:decoration-gold transition-colors">Instagram</a>
+        <a href="#" class="text-paper/70 hover:text-gold underline underline-offset-4 decoration-transparent hover:decoration-gold transition-colors">YouTube</a>
+        <a href="#" class="text-paper/70 hover:text-gold underline underline-offset-4 decoration-transparent hover:decoration-gold transition-colors">TikTok</a>
+      </div>
+    </div>
+
+    <nav aria-label="Navigasi footer">
+      <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-5">Jelajah</p>
+      <ul class="space-y-3 text-sm">
+        <li><a href="#rumah" class="text-paper/70 hover:text-paper transition-colors">Tentang rumah</a></li>
+        <li><a href="#program" class="text-paper/70 hover:text-paper transition-colors">Program Gamma UI</a></li>
+        <li><a href="#metode" class="text-paper/70 hover:text-paper transition-colors">Metode</a></li>
+        <li><a href="#kalkulator" class="text-paper/70 hover:text-paper transition-colors">Kalkulator skor</a></li>
+        <li><a href="#faq" class="text-paper/70 hover:text-paper transition-colors">FAQ</a></li>
+      </ul>
+    </nav>
+
+    <div>
+      <p class="font-mono text-[10px] tracking-[0.3em] uppercase text-gold mb-5">Kontak</p>
+      <ul class="space-y-4 text-sm text-paper/70">
+        <li class="flex gap-3"><i data-lucide="map-pin" class="w-4 h-4 mt-0.5 text-gold shrink-0"></i>Kupang, Nusa Tenggara Timur — rumahnya di sini</li>
+        <li class="flex gap-3"><i data-lucide="phone" class="w-4 h-4 mt-0.5 text-gold shrink-0"></i>0812-3456-7890 (WA &amp; telepon)</li>
+        <li class="flex gap-3"><i data-lucide="clock" class="w-4 h-4 mt-0.5 text-gold shrink-0"></i>Senin–Sabtu, 09.00–20.00 WITA</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-paper/15">
+    <div class="max-w-6xl mx-auto px-5 md:px-8 py-5 flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] tracking-[0.2em] uppercase text-paper/50">
+      <p>© <span id="year">2025</span> Rumah Belajar Kupang — γ Gamma UI adalah program RBK</p>
+      <a href="#atas" class="inline-flex items-center gap-2 hover:text-gold transition-colors">Kembali ke atas <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i></a>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div id="toast" class="hide fixed bottom-6 right-5 md:right-8 z-50 bg-ink text-paper border-l-4 border-gold px-5 py-4 flex items-center gap-3 max-w-xs shadow-xl" role="status" aria-live="polite">
+  <i data-lucide="check-circle-2" class="w-5 h-5 text-gold shrink-0"></i>
+  <p class="text-sm leading-snug">Formulir terkirim. Cek WhatsApp-mu dalam 1×24 jam!</p>
+</div>
+
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Ikon ---------- */
+  if (window.lucide) lucide.createIcons();
+
+  /* ---------- Tahun footer ---------- */
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---------- Header: shadow + progress bar + nav aktif ---------- */
+  const header = document.getElementById('site-header');
+  const progress = document.getElementById('scroll-progress');
+  const navLinks = [...document.querySelectorAll('.nav-link')];
+  const sections = navLinks.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+
+  function onScroll() {
+    header.classList.toggle('shadow-[0_6px_24px_rgba(15,27,45,0.10)]', window.scrollY > 10);
+    const h = document.documentElement;
+    progress.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+
+    let active = null;
+    for (const s of sections) if (s.getBoundingClientRect().top <= 140) active = s;
+    navLinks.forEach(l => {
+      const on = active && l.getAttribute('href') === '#' + active.id;
+      l.classList.toggle('text-ink', on);
+      l.classList.toggle('border-gold', on);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---------- Menu mobile ---------- */
+  const mobMenu = document.getElementById('mobile-menu');
+  const menuBtn = document.getElementById('menu-btn');
+  const menuClose = document.getElementById('menu-close');
+  function toggleMenu(open) {
+    mobMenu.classList.toggle('hidden', !open);
+    menuBtn.setAttribute('aria-expanded', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  menuBtn.addEventListener('click', () => toggleMenu(true));
+  menuClose.addEventListener('click', () => toggleMenu(false));
+  document.querySelectorAll('.mob-link').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
+
+  /* ---------- Reveal on scroll ---------- */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ---------- Count-up angka ---------- */
+  const ioNum = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target, target = +el.dataset.count, id = el.dataset.format === 'id';
+      const t0 = performance.now(), dur = 1300;
+      (function tick(t) {
+        const p = Math.min((t - t0) / dur, 1), ease = 1 - Math.pow(1 - p, 3);
+        const v = Math.round(target * ease);
+        el.textContent = id ? v.toLocaleString('id-ID') : v;
+        if (p < 1) requestAnimationFrame(tick);
+      })(t0);
+      ioNum.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => ioNum.observe(el));
+
+  /* ---------- Accordion generik ---------- */
+  function initAccordion(items, exclusive) {
+    items.forEach(item => {
+      const btn = item.querySelector('.acc-row');
+      const panel = item.querySelector('.acc-panel');
+      btn.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        if (exclusive) items.forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.acc-panel').style.maxHeight = '0px';
+          i.querySelector('.acc-row').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          item.classList.remove('open');
+          panel.style.maxHeight = '0px';
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+  }
+  const progItems = [...document.querySelectorAll('.prog-item')];
+  const faqItems = [...document.querySelectorAll('#faq-list .acc-item')];
+  initAccordion(progItems, false);
+  initAccordion(faqItems, true);
+
+  function openProgram(item) {
+    if (item.classList.contains('open')) return;
+    item.querySelector('.acc-row').click();
+    item.classList.add('flash');
+    setTimeout(() => item.classList.remove('flash'), 2500);
+  }
+
+  /* ---------- Kalkulator SIMAK ---------- */
+  const subs = [
+    { s: document.getElementById('s-pm'),  o: document.getElementById('o-pm') },
+    { s: document.getElementById('s-pv'),  o: document.getElementById('o-pv') },
+    { s: document.getElementById('s-pk'),  o: document.getElementById('o-pk') },
+    { s: document.getElementById('s-ppu'), o: document.getElementById('o-ppu') },
+  ];
+  const elAvg = document.getElementById('calc-avg');
+  const elFill = document.getElementById('calc-fill');
+  const elVerdict = document.getElementById('calc-verdict');
+  const calcCta = document.getElementById('calc-cta');
+
+  const ZONES = [
+    { max: 45,  text: 'Fondasi belum solid — normal. Ini titik start 6 dari 10 siswa kami.', prog: 'reguler', label: 'Reguler SIMAK UI' },
+    { max: 62,  text: 'Kamu di tengah jalur. Yang kurang biasanya konsistensi, bukan kemampuan.', prog: 'reguler', label: 'Reguler SIMAK UI' },
+    { max: 78,  text: 'Jarakmu ke kursi UI tinggal pola &amp; strategi pengerjaan — ini wilayah Final Sprint.', prog: 'sprint', label: 'Intensif Final Sprint' },
+    { max: 101, text: 'Skor kompetitif. Tugasmu menjaganya sampai hari-H — tryout rutin &amp; konsultasi.', prog: 'tryout', label: 'Tryout+ & Diagnostik' },
+  ];
+
+  function recalc() {
+    let sum = 0;
+    subs.forEach(({ s, o }) => { o.textContent = s.value; sum += +s.value; });
+    const avg = Math.round(sum / subs.length);
+    elAvg.textContent = avg;
+    elFill.style.width = avg + '%';
+
+    const z = ZONES.find(z => avg < z.max);
+    elVerdict.innerHTML = z.text;
+    calcCta.dataset.target = z.prog;
+    calcCta.firstChild.textContent = 'Lihat rekomendasi: ' + z.label + ' ';
+  }
+  subs.forEach(({ s }) => s.addEventListener('input', recalc));
+  recalc();
+
+  calcCta.addEventListener('click', () => {
+    const item = progItems.find(p => p.dataset.prog === calcCta.dataset.target);
+    if (item) {
+      openProgram(item);
+      item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  /* ---------- Prefill form dari CTA program ---------- */
+  const selectProg = document.getElementById('f-prog');
+  document.querySelectorAll('.prog-cta').forEach(a => {
+    a.addEventListener('click', () => { selectProg.value = a.dataset.value; });
+  });
+
+  /* ---------- Carousel testimoni ---------- */
+  const tItems = [...document.querySelectorAll('.t-item')];
+  const tCounter = document.getElementById('t-counter');
+  const tStage = document.getElementById('t-stage');
+  let ti = 0, tTimer = null, paused = false;
+
+  function showT(i) {
+    ti = (i + tItems.length) % tItems.length;
+    tItems.forEach((el, k) => el.classList.toggle('off', k !== ti));
+    tCounter.textContent = String(ti + 1).padStart(2, '0') + ' / ' + String(tItems.length).padStart(2, '0');
+  }
+  function autoT() {
+    clearInterval(tTimer);
+    if (!paused) tTimer = setInterval(() => showT(ti + 1), 6500);
+  }
+  document.getElementById('t-prev').addEventListener('click', () => { showT(ti - 1); autoT(); });
+  document.getElementById('t-next').addEventListener('click', () => { showT(ti + 1); autoT(); });
+  tStage.addEventListener('mouseenter', () => { paused = true; autoT(); });
+  tStage.addEventListener('mouseleave', () => { paused = false; autoT(); });
+  autoT();
+
+  /* ---------- Toast ---------- */
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function showToast() {
+    toast.classList.remove('hide');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add('hide'), 4200);
+  }
+
+  /* ---------- Form trial: validasi inline ---------- */
+  const form = document.getElementById('trial-form');
+  const fields = {
+    nama: { el: document.getElementById('f-nama'),  ok: v => v.trim().length >= 2 },
+    wa:   { el: document.getElementById('f-wa'),    ok: v => v.replace(/\D/g, '').length >= 9 && v.replace(/\D/g, '').length <= 14 },
+    prog: { el: document.getElementById('f-prog'),  ok: v => v !== '' },
+  };
+
+  function setErr(field, on) {
+    const msg = field.el.closest('div').querySelector('.err');
+    if (msg) msg.classList.toggle('hidden', !on);
+    field.el.classList.toggle('border-rust', on);
+    field.el.classList.toggle('border-ink/60', !on);
+  }
+  [fields.nama, fields.wa, fields.prog].forEach(f =>
+    f.el.addEventListener('input', () => setErr(f, !f.ok(f.el.value)))
+  );
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let valid = true;
+    [fields.nama, fields.wa, fields.prog].forEach(f => {
+      const bad = !f.ok(f.el.value);
+      setErr(f, bad);
+      if (bad) valid = false;
+    });
+    if (!valid) { form.querySelector('.border-rust')?.focus(); return; }
+
+    const nama = fields.nama.el.value.trim().split(' ')[0];
+    document.getElementById('s-nama').textContent = 'Kak ' + nama;
+    document.getElementById('s-prog').textContent = fields.prog.el.value;
+    document.getElementById('s-ref').textContent = 'γ-' + String(Math.floor(1000 + Math.random() * 9000));
+    form.classList.add('hidden');
+    document.getElementById('form-success').classList.remove('hidden');
+    showToast();
+  });
+
+  onScroll();
+})();
+</script>
+</body>
+</html>
